@@ -1,8 +1,38 @@
 <template>
-    <div> <button class="button is-link" @click="issue">Open Issues</button>
-        Open Issues: {{opencount}}
-        <p>Closed Issues: {{closedcount}}</p>
-        <p>Week Issues: {{weekcount}}</p>
+    <div id="issue"> 
+        <div id="inputRepo">
+            <div class="columns is-vcentered ">
+            <div class="column is 1">
+                <input  class="input is-link" type="text" placeholder="Owner's Name" required v-model="owner"/>
+            </div>
+            <div >
+        <span class="tag is-info is-light is-large  ">/</span>
+    </div>
+    <div class="column is 1">
+                <input  class="input is-link" type="text" placeholder="Repository Name" required v-model="repo"/>
+            </div>
+            <div>
+                <button class="button is-link" @click="issue">Open Issues</button>
+            </div>
+    </div>
+        </div> 
+        
+            
+            {{weekcount}}
+            <br><br><br>
+        
+    <div class="columns is-vcentered ">
+    <div class="column is-5">
+        <span class="tag is-primary is-large  ">Open {{opencount}}</span>
+    </div>
+    <div class="column is-5">
+        <span class="tag is-warning is-large  ">This week {{weekcount[0]}}</span>
+    </div>
+    <div>
+        <span class="tag is-danger is-large is-light">Closed {{closedcount}}</span>
+    </div>
+    </div>
+        
         <p>{{issue.number}}</p>
         <div class="container">
             <div class="table-container">
@@ -37,11 +67,15 @@ export default {
     name:"Issues",
     data(){
         return{
+            owner:null,
+            repo:null,
             issues: [],
-            opencount:[],
+            opencount:null,
             open:null,
-            closedcount:[],
+            closedcount:null,
             weekcount:[],
+            startDate:0,
+            endDate:7
             
         }
        
@@ -66,20 +100,30 @@ export default {
         //     this.closedcount=res.data.filter(element=>element.state=="closed").length,
         //  console.log(this.closedcount)
         //  })
-        axios.get('https://api.github.com/search/issues?q=is:issue+is:closed+repo:'+'khronosgroup'+'/'+'webgl')
+        axios.get('https://api.github.com/search/issues?q=is:issue+is:closed+repo:'+this.owner+'/'+this.repo)
         .then((res)=>{
             console.log(res)
             this.closedcount=res.data.total_count
         })
      },
      weeklycount(){
-         axios.get('https://api.github.com/search/issues?q=is:issue+repo:'+'khronosgroup'+'/'+'webgl'+"+created:" + moment().subtract(7, "days").format('YYYY-MM-DD') + ".." + moment().subtract(24, "hours").format('YYYY-MM-DD'))
+         for(let i=0;i<=10;i++){
+             
+         axios.get('https://api.github.com/search/issues?q=is:issue+repo:'+this.owner+'/'+this.repo+"+created:" + moment().subtract(this.endDate, "days").format('YYYY-MM-DD') + ".." + moment().subtract(this.startDate, "days").format('YYYY-MM-DD'))
          .then((res)=>{
-             this.weekcount=res.data.total_count
+            this.weekcount.push(res.data.total_count)
+            console.log("haha")
          })
+         console.log("aaao")
+         this.startDate+=7,
+         this.endDate+=7
+         console.log(this.startDate)
+         console.log(this.endDate)
+         console.log("pppp")
+         }
      },
      issuetable(){
-         axios.get('https://api.github.com/search/issues?q=is:issue+repo:'+'khronosgroup'+'/'+'webgl').
+         axios.get('https://api.github.com/search/issues?q=is:issue+repo:'+this.owner+'/'+this.repo).
          then((res)=>{
              this.issues=res.data.items
          })
@@ -97,10 +141,13 @@ export default {
 </script>
 
 <style>
-  #list {
+  #issue {
   margin: auto;
   margin-top: 3rem;
-  max-width: 700px;
+  max-width: 1250px;
+}
+#inputRepo{
+    max-width: 1240px;
 }
 .icon {
   cursor: pointer;
