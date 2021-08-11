@@ -17,23 +17,48 @@
     </div>
         </div> 
         
+            open: {{openMonth}}
+           
             
-            {{weekcount}}
-            <br><br><br>
+            <br><br>
+           close:  {{closeMonth}}
         
     <div class="columns is-vcentered ">
     <div class="column is-5">
         <span class="tag is-primary is-large  ">Open {{opencount}}</span>
     </div>
     <div class="column is-5">
-        <span class="tag is-warning is-large  ">This week {{weekcount[0]}}</span>
+        <span class="tag is-link is-large  ">This week {{weekcount[0]}}</span>
     </div>
     <div>
         <span class="tag is-danger is-large is-light">Closed {{closedcount}}</span>
     </div>
     </div>
-        
-        <p>{{issue.number}}</p>
+        <div class="columns is-vcentered ">
+            <div class="column is-2">
+        <span class="tag is-info is-light is-large  "> 2nd Week : {{weekcount[1]}}</span>
+    </div>
+    <div class="column is-2">
+        <span class="tag is-info is-large  "> 3rd Week : {{weekcount[2]}}</span>
+    </div>
+    <div class="column is-2">
+        <span class="tag is-info is-light is-large  ">4th Week : {{weekcount[3]}}</span>
+    </div>
+    <div class="column is-2">
+        <span class="tag is-info is-large  "> 5th Week : {{weekcount[4]}}</span>
+    </div>
+    <div class="column is-2">
+        <span class="tag is-info is-light is-large  "> 6th Week : {{weekcount[5]}}</span>
+    </div>
+    <div class="column is-2">
+        <span class="tag is-info is-large  ">7th Week : {{weekcount[6]}}</span>
+    </div>
+            </div>
+        <div>
+            <span class="tag is-primary is-light is-large  ">Ratio of open issues to closed issues in past 30 days= {{openMonth}}:{{closeMonth}}</span><br><br>
+            
+            <progress class="progress is-success is-large" v-bind:value="(this.closeMonth/this.openMonth)*100" max="100">100</progress> 
+        </div><br>
         <div class="container">
             <div class="table-container">
                 <table class="table is-bordered is-striped is-hoverable is-fullwidth">
@@ -75,7 +100,10 @@ export default {
             closedcount:null,
             weekcount:[],
             startDate:0,
-            endDate:7
+            endDate:7,
+            openMonth:null,
+            closeMonth:null
+             
             
         }
        
@@ -107,21 +135,40 @@ export default {
         })
      },
      weeklycount(){
-         for(let i=0;i<=10;i++){
+         for(let i=0;i<=6;i++){
              
          axios.get('https://api.github.com/search/issues?q=is:issue+repo:'+this.owner+'/'+this.repo+"+created:" + moment().subtract(this.endDate, "days").format('YYYY-MM-DD') + ".." + moment().subtract(this.startDate, "days").format('YYYY-MM-DD'))
          .then((res)=>{
             this.weekcount.push(res.data.total_count)
-            console.log("haha")
          })
-         console.log("aaao")
+         
          this.startDate+=7,
          this.endDate+=7
          console.log(this.startDate)
          console.log(this.endDate)
-         console.log("pppp")
          }
      },
+     monthlyopencount(){
+         
+             
+         axios.get('https://api.github.com/search/issues?q=is:open is:issue+repo:'+this.owner+'/'+this.repo+"+created:" + moment().subtract(30, "days").format('YYYY-MM-DD') + ".." + moment().subtract(0, "days").format('YYYY-MM-DD'))
+         .then((res)=>{
+            this.openMonth=res.data.total_count
+         })
+         
+        
+     },
+     monthlyclosecount(){
+         
+             
+         axios.get('https://api.github.com/search/issues?q=is:closed is:issue+repo:'+this.owner+'/'+this.repo+"+created:" + moment().subtract(30, "days").format('YYYY-MM-DD') + ".." + moment().subtract(0, "days").format('YYYY-MM-DD'))
+         .then((res)=>{
+            this.closeMonth=res.data.total_count
+         })
+         
+         
+     },
+     
      issuetable(){
          axios.get('https://api.github.com/search/issues?q=is:issue+repo:'+this.owner+'/'+this.repo).
          then((res)=>{
@@ -134,7 +181,9 @@ export default {
          this.openissues(),
          this.closedissues(),
          this.weeklycount(),
-         this.issuetable()
+         this.issuetable(),
+         this.monthlyopencount(),
+         this.monthlyclosecount()
      }
      }
 }
